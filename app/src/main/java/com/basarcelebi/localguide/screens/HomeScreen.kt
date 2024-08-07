@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -44,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -59,9 +61,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.basarcelebi.localguide.R
@@ -319,7 +323,7 @@ fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: N
         }
 
         items(places) { place ->
-            PlaceCard(place, viewModel::toggleFavorite)
+            PlaceCard(navController = navHostController, place, viewModel::toggleFavorite)
         }
     }
 }
@@ -360,13 +364,14 @@ fun CategoryCard(category: String) {
 }
 
 @Composable
-fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
+fun PlaceCard(navController: NavHostController = rememberNavController(),place : Place, onFavoriteClick: (Place) -> Unit) {
     val poppins = FontFamily(Font(R.font.poppins))
+    val isDarkTheme = isSystemInDarkTheme()
     Card(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth()
-            .clickable { /*TODO*/ }
+            .clickable { navController.navigate("details/${place.name}") }
             .background(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp))
     {
@@ -376,10 +381,14 @@ fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
             .size(125.dp)) {
             Box{
                 Image(
-                    painter = rememberImagePainter(data = place.imageUrl),
+                    painter = rememberAsyncImagePainter(model = place.imageUrl),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shadow(8.dp)
                 )
                 // Favorite button
                 IconButton(
@@ -404,7 +413,8 @@ fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
                         Icon(
                             imageVector = Icons.Outlined.FavoriteBorder,
                             contentDescription = null,
-                            modifier = Modifier.size(36.dp))
+                            modifier = Modifier.size(36.dp),
+                            tint = Color.Black)
                     }
 
                 }
@@ -427,14 +437,16 @@ fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontFamily = poppins,
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    color = if (isDarkTheme) Color.White else Color.Black
                 )
                 Text(
                     text = place.address,
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = poppins,
                         fontWeight = FontWeight.Normal
-                    )
+                    ),
+                    color = if (isDarkTheme) Color.White else Color.Black
                 )
 
 
@@ -451,13 +463,14 @@ fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = poppins,
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    color = if (isDarkTheme) Color.White else Color.Black
                 )
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = Color.Black
+                    tint = if (isDarkTheme) Color.White else Color.Black
                 )
             }
             }
@@ -476,7 +489,8 @@ fun CategoryCardPreview() {
 @Composable
 fun PlaceCardPreview() {
     val places = PlaceObject.getPlaces()
-    PlaceCard(places[0],{})
+    val navController = rememberNavController()
+    PlaceCard(navController,places[0],{})
 }
 
 @Preview

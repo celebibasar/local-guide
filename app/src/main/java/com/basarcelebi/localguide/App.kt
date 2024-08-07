@@ -36,10 +36,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.basarcelebi.localguide.screens.DetailsScreen
 import com.basarcelebi.localguide.screens.FavoriteScreen
 import com.basarcelebi.localguide.screens.HomeScreen
 import com.basarcelebi.localguide.screens.ProfileScreen
@@ -178,7 +181,13 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
         composable("home") { HomeScreen(viewModel, navController) }
         composable("favorites") { FavoriteScreen(navController,viewModel) }
         composable("profile") { ProfileScreen(navController) }
-        composable("details") { Text("Details") }
+        composable("details/{placeName}", arguments = listOf(navArgument("placeName") { type = NavType.StringType })) { backStackEntry ->
+            val placeName = backStackEntry.arguments?.getString("placeName")
+            val place = viewModel.places.value?.find { it.name == placeName }
+            place?.let {
+                DetailsScreen(navController, it)
+            }
+        }
         composable("contributions") { Text("Contributions") }
         composable("settings") { Text("Settings") }
         composable("faq") { Text("FAQ") }

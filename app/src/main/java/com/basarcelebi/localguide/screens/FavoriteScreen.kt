@@ -18,7 +18,7 @@ fun FavoriteScreen(navController: NavHostController, viewModel: FavoritesViewMod
 
     LazyColumn {
         items(favoritePlaces) { place ->
-            PlaceCard(place, viewModel::toggleFavorite)
+            PlaceCard(navController,place, viewModel::toggleFavorite)
         }
     }
 }
