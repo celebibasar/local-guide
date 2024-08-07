@@ -3,7 +3,6 @@ package com.basarcelebi.localguide
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
@@ -34,14 +33,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.basarcelebi.localguide.screens.FavoriteScreen
 import com.basarcelebi.localguide.screens.HomeScreen
 import com.basarcelebi.localguide.screens.ProfileScreen
+import com.basarcelebi.localguide.viewmodel.FavoritesViewModel
 
 @Composable
 fun LocalGuideApp(innerPadding: PaddingValues, navController: NavHostController = rememberNavController()) {
@@ -171,9 +173,10 @@ fun BottomNavigationBar(navController: NavHostController) {
 
 @Composable
 fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues) {
+    val viewModel: FavoritesViewModel = viewModel()
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen() }
-        composable("favorites") { Text("Favorite") }
+        composable("home") { HomeScreen(viewModel, navController) }
+        composable("favorites") { FavoriteScreen(navController,viewModel) }
         composable("profile") { ProfileScreen(navController) }
         composable("details") { Text("Details") }
         composable("contributions") { Text("Contributions") }

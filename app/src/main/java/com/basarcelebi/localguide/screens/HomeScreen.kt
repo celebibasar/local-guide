@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
@@ -37,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,12 +58,17 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.basarcelebi.localguide.R
 import com.basarcelebi.localguide.data.City
 import com.basarcelebi.localguide.data.Place
+import com.basarcelebi.localguide.model.PlaceObject
+import com.basarcelebi.localguide.viewmodel.FavoritesViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -259,17 +264,13 @@ fun CitiesCard() {
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: NavHostController) {
     val cities = listOf(
         City("Istanbul", "Türkiye", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"),
         City("Paris", "France", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"),
         City("New York", "USA", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg")
     )
-    val places = listOf(
-        Place("Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f),
-        Place("Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f),
-        Place("Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f)
-    )
+    val places by viewModel.places.observeAsState(emptyList())
     val username = "Basar"
 
     LazyColumn(
@@ -317,8 +318,8 @@ fun HomeScreen() {
             }
         }
 
-        items(places.size) { index ->
-            PlaceCard(place = places[index])
+        items(places) { place ->
+            PlaceCard(place, viewModel::toggleFavorite)
         }
     }
 }
@@ -335,9 +336,12 @@ fun CategoryCard(category: String) {
         Box(
             modifier = Modifier
                 .background(
-                    if (isSelected) {Color(0xFFF3EFEF)}
-                    else {Color(0xFF464242)
-                    })
+                    if (isSelected) {
+                        Color(0xFFF3EFEF)
+                    } else {
+                        Color(0xFF464242)
+                    }
+                )
                 .wrapContentWidth()
                 .wrapContentHeight()
                 .padding(8.dp),
@@ -356,9 +360,8 @@ fun CategoryCard(category: String) {
 }
 
 @Composable
-fun PlaceCard(place : Place) {
+fun PlaceCard(place : Place, onFavoriteClick: (Place) -> Unit) {
     val poppins = FontFamily(Font(R.font.poppins))
-    var isFavorite by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(16.dp)
@@ -380,7 +383,7 @@ fun PlaceCard(place : Place) {
                 )
                 // Favorite button
                 IconButton(
-                    onClick = { isFavorite = !isFavorite },
+                    onClick = { onFavoriteClick(place) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
@@ -389,7 +392,7 @@ fun PlaceCard(place : Place) {
                             shape = CircleShape
                         )
                 ) {
-                    if (isFavorite) {
+                    if (place.isFavorited) {
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
@@ -403,6 +406,7 @@ fun PlaceCard(place : Place) {
                             contentDescription = null,
                             modifier = Modifier.size(36.dp))
                     }
+
                 }
 
             }
@@ -426,7 +430,7 @@ fun PlaceCard(place : Place) {
                     )
                 )
                 Text(
-                    text = place.description,
+                    text = place.address,
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = poppins,
                         fontWeight = FontWeight.Normal
@@ -471,11 +475,8 @@ fun CategoryCardPreview() {
 @Preview
 @Composable
 fun PlaceCardPreview() {
-    val places = listOf(
-        Place( "Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f),
-        Place( "Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f),
-        Place( "Place Name", "Place Description", "Category", "Address", "Phone", "Website", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg", 4.5f))
-    PlaceCard(places[0])
+    val places = PlaceObject.getPlaces()
+    PlaceCard(places[0],{})
 }
 
 @Preview
@@ -505,5 +506,6 @@ fun CitiesCardPreview() {
 @PreviewScreenSizes
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    val navController = rememberNavController()
+    HomeScreen(FavoritesViewModel(),navController)
 }

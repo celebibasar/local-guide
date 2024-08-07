@@ -2,6 +2,7 @@ package com.basarcelebi.localguide.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +38,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.localguide.R
 import com.basarcelebi.localguide.data.User
+import com.basarcelebi.localguide.ui.theme.Grey160
+import com.basarcelebi.localguide.ui.theme.Grey40
 
 
 @Composable
@@ -142,7 +146,14 @@ fun NavigationCard(navController: NavHostController, navName: String, name: Stri
             .padding(8.dp)
             .size(width = if (isRotated) screenHeight/1.5f else screenWidth/2.5f , height = if (isRotated) screenWidth/4 else screenHeight/4)
             .clickable { navController.navigate(navName) },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardColors(
+            containerColor = if(isDarkTheme) Grey40 else Grey160,
+            contentColor = Color.Unspecified,
+            disabledContainerColor = Color.Unspecified,
+            disabledContentColor = Color.Unspecified
+
+        )
     ) {
         Column(
             modifier = Modifier
@@ -279,16 +290,12 @@ fun ProfileCardPreview() {
     ProfileCard(user)
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun NavigationCardPreview() {
     val navController = rememberNavController()
     NavigationCard(navController, "details","Your Details", R.drawable.logo)
 }
-
-
-
 
 @Preview(showBackground = true)
 @PreviewScreenSizes
