@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -276,6 +277,7 @@ fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: N
     )
     val places by viewModel.places.observeAsState(emptyList())
     val username = "Basar"
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
 
     LazyColumn(
         modifier = Modifier
@@ -317,7 +319,13 @@ fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: N
                     .padding(start = 16.dp, end = 16.dp)
             ) {
                 items(categories.size) { index ->
-                    CategoryCard(category = categories[index])
+                    CategoryCard(
+                        category = categories[index],
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selected ->
+                            selectedCategory = if (selectedCategory == selected) null else selected
+                        }
+                    )
                 }
             }
         }
@@ -330,20 +338,25 @@ fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: N
 
 
 @Composable
-fun CategoryCard(category: String) {
-    var isSelected by remember { mutableStateOf(false) }
+fun CategoryCard(
+    category: String,
+    selectedCategory: String?,
+    onCategorySelected: (String) -> Unit
+) {
+    val isSelected = selectedCategory == category
+
     Card(
         modifier = Modifier.padding(end = 8.dp),
         shape = CircleShape,
-        onClick = { isSelected = !isSelected  }
+        onClick = { onCategorySelected(category) }
     ) {
         Box(
             modifier = Modifier
                 .background(
                     if (isSelected) {
-                        Color(0xFFF3EFEF)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     } else {
-                        Color(0xFF464242)
+                        MaterialTheme.colorScheme.surface
                     }
                 )
                 .wrapContentWidth()
@@ -356,11 +369,14 @@ fun CategoryCard(category: String) {
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = FontFamily(Font(R.font.poppins_bold)),
                 modifier = Modifier.align(Alignment.Center),
-                color = if (!isSelected) {Color.White} else {MaterialTheme.colorScheme.onSurface}
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
         }
     }
-
 }
 
 @Composable
@@ -388,7 +404,6 @@ fun PlaceCard(navController: NavHostController = rememberNavController(),place :
                         .fillMaxWidth()
                         .padding(4.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .shadow(8.dp)
                 )
                 // Favorite button
                 IconButton(
@@ -482,7 +497,7 @@ fun PlaceCard(navController: NavHostController = rememberNavController(),place :
 @Preview
 @Composable
 fun CategoryCardPreview() {
-    CategoryCard("Category 1")
+    CategoryCard("Category 1", "Category 1", {})
 }
 
 @Preview

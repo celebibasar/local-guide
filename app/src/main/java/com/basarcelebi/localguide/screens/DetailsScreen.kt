@@ -1,14 +1,27 @@
 package com.basarcelebi.localguide.screens
 
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,13 +35,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,9 +67,12 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -56,12 +83,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -83,12 +112,17 @@ fun DetailsScreen(navController: NavHostController, place: Place) {
             DetailsCard(place = place)
         }
         item{
-            Text(text = "\uD83D\uDCAC Reviews",
+            Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "\uD83D\uDCAC Reviews",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontFamily = poppins,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier.padding(start=16.dp))
+                ReviewButton()
+
+            }
+
             ReviewCard(user = User(1, "Basar Celebi", "Izmir","Turkey","basarcelebi","123", R.drawable.logo))
         }
     }
@@ -201,7 +235,7 @@ fun DetailsCard(place : Place) {
 }
 
 @Composable
-fun NavigationIcons()
+fun NavigationIcons(context : Context = LocalContext.current, locationQuery: String = "Can Codina, Barcelona")
 {
     val poppins = FontFamily(Font(R.font.poppins))
     val isDarkTheme = isSystemInDarkTheme()
@@ -220,65 +254,43 @@ fun NavigationIcons()
 
     val iconSize = with(LocalDensity.current) {
         if (screenWidth < 600.dp) {
-            50.dp
+            30.dp
         } else if (screenWidth < 840.dp) {
-            70.dp
+            40.dp
         } else {
-            90.dp
+            60.dp
         }
     }
     Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-            IconButton(onClick = { },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(iconSize)
-                    .border(2.dp, if(isDarkTheme) Color.White else Color.Black, CircleShape)) {
-
-                Icon(imageVector = rememberDirections(),
-                    contentDescription = "Directions Icon",
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(4.dp),
-                    tint = if(isDarkTheme) Color.White else Color.Black)
-
-            }
-            Text(text = "Directions",
+       //Open in Map Button
+        Button(modifier = Modifier
+            .padding(8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.Unspecified)
+            .height(40.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = if(isDarkTheme) Color.White else Color.Black,
+            ),
+            border = if(isDarkTheme) BorderStroke(1.dp, Color.White) else BorderStroke(1.dp, Color.Black),
+            onClick = {
+                // Tüm harita uygulamalarında çalışacak bir URI oluşturun
+                val uri = Uri.parse("geo:0,0?q=${Uri.encode(locationQuery)}")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                context.startActivity(intent)
+            }) {
+            Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Location Icon",
+                modifier = Modifier.size(iconSize),
+                tint = if(isDarkTheme) Color.White else Color.Black)
+            Text(text = "Open in Maps",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = poppins,
                     fontWeight = FontWeight.Bold
                 ),
-                modifier = Modifier.padding(4.dp),
-                fontSize = fontSize,
-                color = if(isDarkTheme) Color.White else Color.Black)
-
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-        IconButton(onClick = { },
-            modifier = Modifier
-                .padding(8.dp)
-                .size(iconSize)
-                .border(2.dp, if(isDarkTheme) Color.White else Color.Black, CircleShape)) {
-            Icon(
-                imageVector = rememberPhoneInTalk(),
-                contentDescription = "Phone Icon",
-                modifier = Modifier
-                    .size(iconSize)
-                    .padding(4.dp),
-                tint = if(isDarkTheme) Color.White else Color.Black
-            )
-        }
-            Text(text = "Call",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = poppins,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(4.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = fontSize,
                 color = if(isDarkTheme) Color.White else Color.Black)
         }
@@ -287,6 +299,152 @@ fun NavigationIcons()
     }
 
 }
+@Composable
+fun ReviewButton() {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isExpanded by interactionSource.collectIsPressedAsState()
+
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val buttonWidth by animateDpAsState(
+        targetValue = if (isExpanded) 150.dp else 48.dp
+    )
+
+
+
+    Button(
+        onClick = {showDialog = true},
+        modifier = Modifier
+            .width(buttonWidth)
+            .height(42.dp)
+            .padding(end = 16.dp),
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
+        interactionSource = interactionSource,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+        ),
+        border = BorderStroke(1.dp, if (isSystemInDarkTheme()) Color.White else Color.Black)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (isExpanded) {
+                Text(
+                    text = "Add Review",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Review",
+                modifier = Modifier.padding(start = if (isExpanded) 8.dp else 0.dp,end = if (isExpanded) 8.dp else 0.dp)
+            )
+        }
+    }
+    if (showDialog) {
+        ReviewDialog(
+            onDismiss = { showDialog = false },
+            onSubmit = { reviewText, rating ->
+                // Burada reviewText ve rating'i işleyin
+                showDialog = false
+                // Örneğin, bu veriyi bir sunucuya gönderin veya yerel olarak saklayın
+                Toast.makeText(context, "Review Submitted!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+}
+
+@Composable
+fun ReviewDialog(onDismiss: () -> Unit, onSubmit: (String, Int) -> Unit) {
+    var reviewText by remember { mutableStateOf("") }
+    var rating by remember { mutableStateOf(0) }
+    var hoveredIndex by remember { mutableStateOf(-1) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Add Your Review",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = reviewText,
+                    onValueChange = { reviewText = it },
+                    label = { Text("Your review") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Rating", style = MaterialTheme.typography.bodyLarge)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    repeat(5) { index ->
+                        val isHovered = index == hoveredIndex
+                        val scale by animateFloatAsState(targetValue = if (isHovered) 1.2f else 1.0f)
+                        val tint = if (index < rating) Color(0xFFFF9800) else Color.Gray
+                        val icon = if (index < rating) Icons.Rounded.Star else Icons.Outlined.Star
+
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "Star",
+                            tint = tint,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .graphicsLayer(scaleX = scale, scaleY = scale)
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = {
+                                            rating = index + 1
+                                        },
+                                        onPress = { offset ->
+                                            hoveredIndex = index
+                                            tryAwaitRelease()
+                                            hoveredIndex = -1
+                                        }
+                                    )
+                                }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { onSubmit(reviewText, rating) }) {
+                        Text("Submit")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 
 @Composable
 fun ReviewCard(user : User)
@@ -306,7 +464,7 @@ fun ReviewCard(user : User)
         }
     }
     Card(modifier = Modifier
-        .padding(8.dp)
+        .padding(16.dp)
         .fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier
@@ -993,3 +1151,6 @@ fun rememberPhoneInTalk(): ImageVector {
         }.build()
     }
 }
+
+
+

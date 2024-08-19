@@ -1,8 +1,11 @@
 package com.basarcelebi.localguide
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
@@ -43,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.basarcelebi.localguide.screens.DetailsScreen
+import com.basarcelebi.localguide.screens.FaqScreen
 import com.basarcelebi.localguide.screens.FavoriteScreen
 import com.basarcelebi.localguide.screens.HomeScreen
 import com.basarcelebi.localguide.screens.ProfileScreen
@@ -95,13 +99,15 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     BottomNavigation(
         backgroundColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onSurface
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.fillMaxWidth()
     ) {
         val items = listOf("home", "favorites", "profile")
         items.forEach { item ->
             val isSelected = currentRoute == item
             BottomNavigationItem(
                 selected = isSelected,
+                modifier = Modifier.padding(4.dp),
                 icon = {
                     when (item) {
                         "favorites" -> if (isSelected) {
@@ -156,7 +162,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         text = item.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            fontSize = if (isSelected) 14.sp else 12.sp
+                            fontSize = if (isSelected) 16.sp else 14.sp
                         ),
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                     )
@@ -178,19 +184,103 @@ fun BottomNavigationBar(navController: NavHostController) {
 fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues) {
     val viewModel: FavoritesViewModel = viewModel()
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(viewModel, navController) }
-        composable("favorites") { FavoriteScreen(navController,viewModel) }
-        composable("profile") { ProfileScreen(navController) }
-        composable("details/{placeName}", arguments = listOf(navArgument("placeName") { type = NavType.StringType })) { backStackEntry ->
+        composable("home",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { HomeScreen(viewModel, navController) }
+        composable("favorites",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { FavoriteScreen(navController,viewModel) }
+        composable("profile",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { ProfileScreen(navController) }
+        composable("details/{placeName}",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }, arguments = listOf(navArgument("placeName") { type = NavType.StringType })) { backStackEntry ->
             val placeName = backStackEntry.arguments?.getString("placeName")
             val place = viewModel.places.value?.find { it.name == placeName }
             place?.let {
                 DetailsScreen(navController, it)
             }
         }
-        composable("contributions") { Text("Contributions") }
-        composable("settings") { Text("Settings") }
-        composable("faq") { Text("FAQ") }
+        composable("contributions",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { Text("Contributions") }
+        composable("settings",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { Text("Settings") }
+        composable("faq",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { FaqScreen() }
     }
 }
 
@@ -215,4 +305,5 @@ fun LocalGuideAppPreview() {
 fun PreviewBottomNavigationBar() {
     BottomNavigationBar(rememberNavController())
 }
+
 
