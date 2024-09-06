@@ -45,11 +45,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.basarcelebi.localguide.network.UserAuth
+import com.basarcelebi.localguide.screens.ContributionScreen
+import com.basarcelebi.localguide.screens.DetailsCard
 import com.basarcelebi.localguide.screens.DetailsScreen
 import com.basarcelebi.localguide.screens.FaqScreen
 import com.basarcelebi.localguide.screens.FavoriteScreen
 import com.basarcelebi.localguide.screens.HomeScreen
+import com.basarcelebi.localguide.screens.ProfileDetails
 import com.basarcelebi.localguide.screens.ProfileScreen
+import com.basarcelebi.localguide.screens.SettingsScreen
 import com.basarcelebi.localguide.viewmodel.FavoritesViewModel
 
 @Composable
@@ -196,7 +201,7 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
                     AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(700)
                 )
-            }) { HomeScreen(viewModel, navController) }
+            }) { HomeScreen(UserAuth(),viewModel, navController) }
         composable("favorites",
             enterTransition = {
                 slideIntoContainer(
@@ -222,7 +227,7 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
                     AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(700)
                 )
-            }) { ProfileScreen(navController) }
+            }) { ProfileScreen(UserAuth(),navController) }
         composable("details/{placeName}",
             enterTransition = {
                 slideIntoContainer(
@@ -254,7 +259,7 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
                     AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(700)
                 )
-            }) { Text("Contributions") }
+            }) { ContributionScreen() }
         composable("settings",
             enterTransition = {
                 slideIntoContainer(
@@ -267,7 +272,7 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
                     AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(700)
                 )
-            }) { Text("Settings") }
+            }) { SettingsScreen() }
         composable("faq",
             enterTransition = {
                 slideIntoContainer(
@@ -281,6 +286,19 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
                     animationSpec = tween(700)
                 )
             }) { FaqScreen() }
+        composable("details",
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                )
+            }) { ProfileDetails(navController) }
     }
 }
 

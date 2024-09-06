@@ -2,7 +2,6 @@ package com.basarcelebi.localguide.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -37,24 +36,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.localguide.R
-import com.basarcelebi.localguide.data.User
+import com.basarcelebi.localguide.network.UserAuth
 import com.basarcelebi.localguide.ui.theme.Grey160
 import com.basarcelebi.localguide.ui.theme.Grey40
+import com.google.firebase.auth.FirebaseUser
 
 
 @Composable
-fun ProfileScreen(navController: NavHostController) {
+fun ProfileScreen(auth: UserAuth = UserAuth(), navController: NavHostController) {
     val poppins = FontFamily(Font(R.font.poppins))
 
-    val user = User(
-        id = 1,
-        name = "Basar Celebi",
-        city = "Izmir",
-        country = "Turkey",
-        email = "william.henry.harrison@example-pet-store.com",
-        password = "password123",
-        profileImageId = R.drawable.logo
-    )
+    val user = auth.user
 
     val navCards = listOf(
         Pair("details", "Your Details"),
@@ -186,7 +178,7 @@ fun NavigationCard(navController: NavHostController, navName: String, name: Stri
 
 
 @Composable
-fun ProfileCard(user: User) {
+fun ProfileCard(user: FirebaseUser?) {
     val poppins = FontFamily(Font(R.font.poppins))
     // Profile name and location
     Row(modifier = Modifier.fillMaxWidth(),
@@ -197,16 +189,18 @@ fun ProfileCard(user: User) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = user.name,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = poppins,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
+            if (user != null) {
+                Text(
+                    text = user.displayName!!,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = poppins,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
+            /*Text(
                 text = user.city + ", " + user.country,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = poppins,
@@ -214,7 +208,7 @@ fun ProfileCard(user: User) {
                 ),
                 fontSize = 16.sp,
                 modifier = Modifier.align(Alignment.Start)
-            )
+            )*/
         }
         //Profile image
         Column(modifier = Modifier
@@ -286,7 +280,8 @@ fun NavigationCard(navController: NavHostController, navName: String, name: Stri
 @Preview(showBackground = true)
 @Composable
 fun ProfileCardPreview() {
-    val user = User(1, "Basar Celebi", "Izmir", "Turkey", "william.henry.harrison@example-pet-store.com", "password123", R.drawable.logo)
+    val auth = UserAuth()
+    val user = auth.user
     ProfileCard(user)
 }
 
@@ -302,6 +297,7 @@ fun NavigationCardPreview() {
 @Composable
 fun ProfileScreenPreview() {
     val navController = rememberNavController()
+    val auth = UserAuth()
 
-    ProfileScreen(navController)
+    ProfileScreen(auth,navController)
 }

@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -62,17 +61,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.basarcelebi.localguide.R
 import com.basarcelebi.localguide.data.City
 import com.basarcelebi.localguide.data.Place
 import com.basarcelebi.localguide.model.PlaceObject
+import com.basarcelebi.localguide.network.UserAuth
 import com.basarcelebi.localguide.viewmodel.FavoritesViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -269,14 +267,14 @@ fun CitiesCard() {
 
 
 @Composable
-fun HomeScreen(viewModel: FavoritesViewModel = viewModel(), navHostController: NavHostController) {
+fun HomeScreen(auth: UserAuth = UserAuth(), viewModel: FavoritesViewModel = viewModel(), navHostController: NavHostController) {
     val cities = listOf(
         City("Istanbul", "Türkiye", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"),
         City("Paris", "France", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"),
         City("New York", "USA", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg")
     )
     val places by viewModel.places.observeAsState(emptyList())
-    val username = "Basar"
+    val username = auth.user?.displayName ?: "User"
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
 
     LazyColumn(
@@ -497,7 +495,7 @@ fun PlaceCard(navController: NavHostController = rememberNavController(),place :
 @Preview
 @Composable
 fun CategoryCardPreview() {
-    CategoryCard("Category 1", "Category 1", {})
+    CategoryCard("Category 1", "Category 1") {}
 }
 
 @Preview
@@ -505,7 +503,7 @@ fun CategoryCardPreview() {
 fun PlaceCardPreview() {
     val places = PlaceObject.getPlaces()
     val navController = rememberNavController()
-    PlaceCard(navController,places[0],{})
+    PlaceCard(navController,places[0]) {}
 }
 
 @Preview
@@ -536,5 +534,5 @@ fun CitiesCardPreview() {
 @Composable
 fun HomeScreenPreview() {
     val navController = rememberNavController()
-    HomeScreen(FavoritesViewModel(),navController)
+    HomeScreen(UserAuth(),FavoritesViewModel(),navController)
 }

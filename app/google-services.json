@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "525507872546",
+    "project_id": "localguide-2caad",
+    "storage_bucket": "localguide-2caad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:525507872546:android:62347c3d45538aea6e877b",
+        "android_client_info": {
+          "package_name": "com.basarcelebi.localguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "525507872546-4acculmpdhroomr6ip7tiu2sc2fa2l4v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.basarcelebi.localguide",
+            "certificate_hash": "88c3900ee19ba45a803d504d0bc2d692303e5fed"
+          }
+        },
+        {
+          "client_id": "525507872546-m8ubm3objrbh96nv6t4i0enjhmk71uo2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7ZwBsxvHmTU88pxKFuxlgOtsns33nRq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "525507872546-m8ubm3objrbh96nv6t4i0enjhmk71uo2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
