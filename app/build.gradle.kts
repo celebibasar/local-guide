@@ -54,21 +54,25 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.androidx.runtime.livedata)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation ("com.google.firebase:firebase-auth:23.0.0")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation (libs.firebase.auth)
+    implementation (libs.firebase.firestore.ktx)
+    implementation (libs.firebase.firestore)
+    implementation ("com.google.firebase:firebase-firestore:25.1.0")
+    implementation ("com.google.firebase:firebase-core:21.1.1")
+
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    val nav_version = "2.7.7"
-    implementation ("com.google.gms:google-services:4.4.2")
+    implementation (libs.google.services)
 
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("androidx.compose.material:material:1.6.8")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material)
 
-    implementation("com.google.accompanist:accompanist-pager:0.20.0")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.accompanist.pager)
+    implementation(libs.coil.compose)
 
 
     implementation(libs.androidx.core.ktx)

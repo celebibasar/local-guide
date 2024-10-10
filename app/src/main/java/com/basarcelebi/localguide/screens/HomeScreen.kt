@@ -71,6 +71,7 @@ import com.basarcelebi.localguide.data.City
 import com.basarcelebi.localguide.data.Place
 import com.basarcelebi.localguide.model.PlaceObject
 import com.basarcelebi.localguide.network.UserAuth
+import com.basarcelebi.localguide.repositories.PlaceRepository
 import com.basarcelebi.localguide.viewmodel.FavoritesViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -273,7 +274,7 @@ fun HomeScreen(auth: UserAuth = UserAuth(), viewModel: FavoritesViewModel = view
         City("Paris", "France", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"),
         City("New York", "USA", "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg")
     )
-    val places by viewModel.places.observeAsState(emptyList())
+    val places = viewModel.places.value ?: emptyList()
     val username = auth.user?.displayName ?: "User"
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -501,10 +502,17 @@ fun CategoryCardPreview() {
 @Preview
 @Composable
 fun PlaceCardPreview() {
-    val places = PlaceObject.getPlaces()
     val navController = rememberNavController()
-    PlaceCard(navController,places[0]) {}
+
+    var places by remember { mutableStateOf<List<Place>>(emptyList()) }
+
+    if (places.isNotEmpty()) {
+        PlaceCard(navController, places[0]) {}
+    } else {
+        Text("Loading places...")
+    }
 }
+
 
 @Preview
 @Composable

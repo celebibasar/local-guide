@@ -56,6 +56,7 @@ import com.google.firebase.auth.FirebaseAuth
 class SignInActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()

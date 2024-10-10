@@ -98,6 +98,7 @@ import com.basarcelebi.localguide.R
 import com.basarcelebi.localguide.data.Place
 import com.basarcelebi.localguide.data.User
 import com.basarcelebi.localguide.model.PlaceObject
+import com.basarcelebi.localguide.repositories.PlaceRepository
 
 @Composable
 fun DetailsScreen(navController: NavHostController, place: Place) {
@@ -549,7 +550,7 @@ fun NavigationIconsPreview()
 @Preview(showBackground = true)
 @Composable
 fun DetailsCardPreview() {
-    val places = PlaceObject.getPlaces()
+    var places by remember { mutableStateOf<List<Place>>(emptyList()) }
     DetailsCard(places[1])
 }
 
@@ -558,8 +559,8 @@ fun DetailsCardPreview() {
 @Composable
 fun DetailsScreenPreview() {
     val navController = rememberNavController()
-    val place = PlaceObject.getPlaces()[0]
-    DetailsScreen(navController, place)
+    var places by remember { mutableStateOf<List<Place>>(emptyList()) }
+    DetailsScreen(navController, places[1])
 }
 
 
